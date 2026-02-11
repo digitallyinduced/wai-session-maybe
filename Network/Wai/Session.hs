@@ -32,7 +32,7 @@ type Session m k v = ((k -> m (Maybe v)), (k -> v -> m ()))
 
 -- | A 'SessionStore' takes in the contents of the cookie (if there was one)
 -- and returns a ('Session', 'IO' action to get new contents for cookie) pair
-type SessionStore m k v = (Maybe ByteString -> IO (Session m k v, IO ByteString))
+type SessionStore m k v = (Maybe ByteString -> IO (Session m k v, IO (Maybe ByteString)))
 
 -- | Fully parameterised middleware for cookie-based sessions
 withSession ::
@@ -53,13 +53,21 @@ withSession sessions cookieName cookieDefaults vkey app req = do
 	(session, getNewCookie) <- liftIO $ sessions $ lookup cookieName =<< cookies
 #if MIN_VERSION_wai(3,0,0)
 	app (req {vault = Vault.insert vkey session (vault req)}) (\r -> do
-			newCookieVal <- liftIO getNewCookie
-			respond $ mapHeader (\hs -> (setCookie, newCookie newCookieVal):hs) r
+			mNewCookieVal <- liftIO getNewCookie
+			case mNewCookieVal of
+				Just newCookieVal ->
+					respond $ mapHeader (\hs -> (setCookie, newCookie newCookieVal):hs) r
+				Nothing ->
+					respond r
 		)
 #else
 	resp <- app (req {vault = Vault.insert vkey session (vault req)})
-	newCookieVal <- liftIO getNewCookie
-	return $ mapHeader (\hs -> (setCookie, newCookie newCookieVal):hs) resp
+	mNewCookieVal <- liftIO getNewCookie
+	case mNewCookieVal of
+		Just newCookieVal ->
+			return $ mapHeader (\hs -> (setCookie, newCookie newCookieVal):hs) resp
+		Nothing ->
+			return resp
 #endif
 	where
 	newCookie v = Builder.toByteString $ renderSetCookie $ cookieDefaults {
