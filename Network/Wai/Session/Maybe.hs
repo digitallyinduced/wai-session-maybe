@@ -1,5 +1,5 @@
 {-# LANGUAGE CPP #-}
-module Network.Wai.Session (Session, SessionStore, withSession, genSessionId) where
+module Network.Wai.Session.Maybe (Session, SessionStore, withSession, genSessionId) where
 
 import Data.Monoid (mconcat)
 import Data.String (fromString)

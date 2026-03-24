@@ -1,12 +1,12 @@
 {-# LANGUAGE CPP, FlexibleContexts #-}
-module Network.Wai.Session.Map (mapStore, mapStore_) where
+module Network.Wai.Session.Maybe.Map (mapStore, mapStore_) where
 
 import Control.Monad
 import Data.StateVar
 import Data.ByteString (ByteString)
 import Control.Monad.IO.Class (liftIO, MonadIO)
 import Data.IORef
-import Network.Wai.Session (Session, SessionStore, genSessionId)
+import Network.Wai.Session.Maybe (Session, SessionStore, genSessionId)
 
 import Data.Map (Map)
 import qualified Data.Map as Map

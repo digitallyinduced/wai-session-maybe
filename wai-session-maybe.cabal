@@ -30,8 +30,8 @@ extra-source-files:
 
 library
         exposed-modules:
-                Network.Wai.Session,
-                Network.Wai.Session.Map
+                Network.Wai.Session.Maybe,
+                Network.Wai.Session.Maybe.Map
 
         build-depends:
                 base == 4.*,
